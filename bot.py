@@ -1,6 +1,5 @@
-from parser import Avito
-
 import telebot
+from avitoparser import Avito
 
 bot = telebot.TeleBot('1894033956:AAGkD_yFVqY4E1s2-Qinw3hnTtuCsTzDSxs')
 

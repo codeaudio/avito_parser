@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from htmlclass import SPAN_CLASS, DIV_CLASS, A_CLASS
 
 
 class Base:
@@ -42,15 +43,9 @@ class Avito(Base):
             headers=headers
         )
         soup = BeautifulSoup(response.text, 'lxml')
-        price = soup.find_all(
-            'span', class_='price-text-1HrJ_ text-text-1PdBw text-size-s-1PUdo'
-        )
-        text = soup.find_all(
-            'div', class_='iva-item-text-2xkfp iva-item-description-2pXGm text-text-1PdBw text-size-s-1PUdo'
-        )
-        link = soup.find_all(
-            'a', href=True, class_='link-link-39EVK link-design-default-2sPEv title-root-395AQ iva-item-title-1Rmmj title-listRedesign-3RaU2 title-root_maxHeight-3obWc'
-        )
+        price = soup.find_all('span', class_=SPAN_CLASS)
+        text = soup.find_all('div', class_=DIV_CLASS)
+        link = soup.find_all('a', href=True, class_=A_CLASS)
         result = []
         [result.append([text[i].text, price[i].text.replace(u'\xa0', ' ').replace(u'\u2009', ''),
                         'https://www.avito.ru/' + link[i]['href']]) for i in range(0, len(text))]
