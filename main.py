@@ -1,8 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-BASE_URL = 'https://www.avito.ru/'
-
 
 class Base:
     BASE_URL = 'https://www.avito.ru/'
