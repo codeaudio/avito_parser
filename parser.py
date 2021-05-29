@@ -55,6 +55,3 @@ class Avito(Base):
         [result.append([text[i].text, price[i].text.replace(u'\xa0', ' ').replace(u'\u2009', ''),
                         'https://www.avito.ru/' + link[i]['href']]) for i in range(0, len(text))]
         return result
-
-parse = Avito()
-print(parse.city('moskva').min_price('2033200').max_price('333333333').search_object('tayota').get())
