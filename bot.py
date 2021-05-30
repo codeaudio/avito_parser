@@ -20,7 +20,7 @@ def send_start(message):
         message,
         "Это парсер Авито. Заоплните данные посика. "
         "Обязательное поле - объект поиска. "
-        "Необязательные - мин. цена, макс. цена, город."
+        "Необязательные - мин. цена, макс. цена, город, кол-во обявлений."
         " Минус(-) - пропустить необязательное поле "
     )
     msg = bot.reply_to(message, "Введите объект поиcка")
@@ -68,6 +68,21 @@ def process_max_step(message):
         if max_price == '-':
             max_price = ''
         INPUT_DICT['max_price'] = max_price
+        bot.reply_to(
+            message, 'Кол-во объявлений. Минус(-) - все объявления на странице'
+        )
+        msg = bot.reply_to(message, 'кол-во объявлений')
+        bot.register_next_step_handler(msg, process_max_object_step)
+    except Exception as e:
+        bot.register_next_step_handler(e, process_max_object_step)
+
+
+def process_max_object_step(message):
+    try:
+        max_object = message.text
+        if max_object == '-':
+            max_object = None
+        INPUT_DICT['max_object'] = max_object
         msg = bot.reply_to(message, '/parse  -  начать пасринг')
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
@@ -86,7 +101,7 @@ def send_parse_result(message):
     ).search_object(
         INPUT_DICT.get('search_object')
     ).get().parse()
-    [bot.reply_to(message, ''.join(str(res))) for res in result]
+    [bot.reply_to(message, ''.join(str(res))) for res in result[:int(INPUT_DICT.get('max_object'))]]
 
 
 bot.polling(none_stop=True, interval=2)
