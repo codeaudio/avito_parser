@@ -31,10 +31,11 @@ def process_search_step(message):
     try:
         search_object = message.text
         INPUT_DICT['search_object'] = search_object
+        bot.reply_to(message, 'Примеры ввода: sankt-peterburg, rossiya, moskva')
         msg = bot.reply_to(message, 'Введите город')
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
-        bot.reply_to(message, 'ошибка')
+        bot.reply_to(e, 'ошибка')
 
 
 def process_city_step(message):
@@ -46,7 +47,7 @@ def process_city_step(message):
         msg = bot.reply_to(message, 'мин. цена')
         bot.register_next_step_handler(msg, process_min_step)
     except Exception as e:
-        bot.reply_to(message, 'ошибка')
+        bot.reply_to(e, 'ошибка')
 
 
 def process_min_step(message):
@@ -58,7 +59,7 @@ def process_min_step(message):
         msg = bot.reply_to(message, 'макс. цена')
         bot.register_next_step_handler(msg, process_max_step)
     except Exception as e:
-        bot.reply_to(message, 'ошибка')
+        bot.reply_to(e, 'ошибка')
 
 
 def process_max_step(message):
@@ -69,8 +70,8 @@ def process_max_step(message):
         INPUT_DICT['max_price'] = max_price
         msg = bot.reply_to(message, '/parse  -  начать пасринг')
         bot.register_next_step_handler(msg, send_parse_result)
-    except OverflowError as e:
-        bot.register_next_step_handler(msg, send_parse_result)
+    except Exception as e:
+        bot.register_next_step_handler(e, send_parse_result)
 
 
 @bot.message_handler(commands=['help', 'parse'])
