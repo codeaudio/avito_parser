@@ -51,9 +51,13 @@ class Avito(Base):
         price = soup.find_all('span', class_=SPAN_CLASS)
         text = soup.find_all('div', class_=DIV_CLASS)
         link = soup.find_all('a', href=True, class_=A_CLASS)
-        result = []
-        [result.append([price[i].text.replace(u'\xa0', ' ').replace(u'\u2009', ''),
-                        'https://www.avito.ru/' + link[i]['href']]) for i in range(0, len(link))]
+        result = [
+            [price[i].text.replace(
+                u'\xa0', ' '
+            ).replace(
+                u'\u2009', ''
+            ), self.BASE_URL + link[i]['href']] for i in range(0, len(link))
+        ]
         try:
             [result[i].append([text[i].text]) for i in range(0, len(result[0]))]
         except IndexError:
