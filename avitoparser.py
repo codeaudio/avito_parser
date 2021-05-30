@@ -7,6 +7,16 @@ from htmlclass import A_CLASS, DIV_CLASS, SPAN_CLASS
 class Base:
     BASE_URL = 'https://www.avito.ru/'
 
+    headers = {
+        'User-Agent': (
+            'Mozilla/5.0 '
+            '(Windows NT 10.0; Win64; x64) '
+            'AppleWebKit/537.36'
+            ' (KHTML, like Gecko) '
+            'Chrome/89.0.4389.82 Safari/537.36'
+        )
+    }
+
     def city(self, city):
         self.city = city
         return self
@@ -26,22 +36,13 @@ class Base:
 
 class Avito(Base):
     def get(self):
-        headers = {
-            'User-Agent': (
-                'Mozilla/5.0 '
-                '(Windows NT 10.0; Win64; x64) '
-                'AppleWebKit/537.36'
-                ' (KHTML, like Gecko) '
-                'Chrome/89.0.4389.82 Safari/537.36'
-            )
-        }
         self.response = requests.get(
             f'{self.BASE_URL}'
             f'{str(self.city) + "?"}'
             f'{"pmin=" + str(self.min_price)}'
             f'{"&pmax=" + str(self.max_price)}'
             f'{"&q=" + str(self.search_object)}',
-            headers=headers
+            headers=self.headers
         )
         return self
 
