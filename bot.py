@@ -77,8 +77,15 @@ def process_max_step(message):
 @bot.message_handler(commands=['parse'])
 def send_parse_result(message):
     parse = Avito()
-    result = parse.city(INPUT_DICT.get('city')).min_price(INPUT_DICT.get('min_price')).max_price(
-        INPUT_DICT.get('max_price')).search_object(INPUT_DICT.get('search_object')).get()
+    result = parse.city(
+        INPUT_DICT.get('city')
+    ).min_price(
+        INPUT_DICT.get('min_price')
+    ).max_price(
+        INPUT_DICT.get('max_price')
+    ).search_object(
+        INPUT_DICT.get('search_object')
+    ).get().parse()
     [bot.reply_to(message, ''.join(str(res))) for res in result]
 
 

@@ -35,7 +35,7 @@ class Avito(Base):
                 'Chrome/89.0.4389.82 Safari/537.36'
             )
         }
-        response = requests.get(
+        self.response = requests.get(
             f'{self.BASE_URL}'
             f'{str(self.city) + "?"}'
             f'{"pmin=" + str(self.min_price)}'
@@ -43,7 +43,10 @@ class Avito(Base):
             f'{"&q=" + str(self.search_object)}',
             headers=headers
         )
-        soup = BeautifulSoup(response.text, 'lxml')
+        return self
+
+    def parse(self):
+        soup = BeautifulSoup(self.response.text, 'lxml')
         price = soup.find_all('span', class_=SPAN_CLASS)
         text = soup.find_all('div', class_=DIV_CLASS)
         link = soup.find_all('a', href=True, class_=A_CLASS)
