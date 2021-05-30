@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-from htmlclass import SPAN_CLASS, DIV_CLASS, A_CLASS
+
+from htmlclass import A_CLASS, DIV_CLASS, SPAN_CLASS
 
 
 class Base:
@@ -54,4 +55,3 @@ class Avito(Base):
         except IndexError:
             pass
         return result
-parse = Avito()

@@ -1,5 +1,13 @@
+import os
+
 import telebot
+from dotenv import load_dotenv
+
 from avitoparser import Avito
+
+load_dotenv()
+
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 bot = telebot.TeleBot('1894033956:AAGkD_yFVqY4E1s2-Qinw3hnTtuCsTzDSxs')
 
@@ -8,9 +16,14 @@ INPUT_DICT = {}
 
 @bot.message_handler(commands=['help', 'start'])
 def send_start(message):
-    bot.reply_to(message,
-                 "Это парсер Авито. Заоплните данные посика. Обязательное поле - объект поиска. Необязательные - мин. цена, макс. цена, город. Минус(-) - пропустить необязательное поле ")
-    msg = bot.reply_to(message, "Введите объект посика")
+    bot.reply_to(
+        message,
+        "Это парсер Авито. Заоплните данные посика. "
+        "Обязательное поле - объект поиска. "
+        "Необязательные - мин. цена, макс. цена, город."
+        " Минус(-) - пропустить необязательное поле "
+    )
+    msg = bot.reply_to(message, "Введите объект поиcка")
     bot.register_next_step_handler(msg, process_search_step)
 
 
@@ -63,7 +76,8 @@ def process_max_step(message):
 @bot.message_handler(commands=['help', 'parse'])
 def send_parse_result(message):
     parse = Avito()
-    result = parse.city(INPUT_DICT.get('city')).min_price(INPUT_DICT.get('min_price')).max_price(INPUT_DICT.get('max_price')).search_object(INPUT_DICT.get('search_object')).get()
+    result = parse.city(INPUT_DICT.get('city')).min_price(INPUT_DICT.get('min_price')).max_price(
+        INPUT_DICT.get('max_price')).search_object(INPUT_DICT.get('search_object')).get()
     [bot.reply_to(message, ''.join(str(res))) for res in result]
 
 
