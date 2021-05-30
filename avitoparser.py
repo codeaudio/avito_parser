@@ -36,7 +36,7 @@ class Avito(Base):
         }
         response = requests.get(
             f'{self.BASE_URL}'
-            f'{self.city + "?"}'
+            f'{str(self.city) + "?"}'
             f'{"pmin=" + str(self.min_price)}'
             f'{"&pmax=" + str(self.max_price)}'
             f'{"&q=" + str(self.search_object)}',
@@ -47,6 +47,11 @@ class Avito(Base):
         text = soup.find_all('div', class_=DIV_CLASS)
         link = soup.find_all('a', href=True, class_=A_CLASS)
         result = []
-        [result.append([text[i].text, price[i].text.replace(u'\xa0', ' ').replace(u'\u2009', ''),
-                        'https://www.avito.ru/' + link[i]['href']]) for i in range(0, len(text))]
+        [result.append([price[i].text.replace(u'\xa0', ' ').replace(u'\u2009', ''),
+                        'https://www.avito.ru/' + link[i]['href']]) for i in range(0, len(link))]
+        try:
+            [result[i].append([text[i].text]) for i in range(0, len(result[0]))]
+        except IndexError:
+            pass
         return result
+parse = Avito()
