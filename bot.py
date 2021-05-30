@@ -9,7 +9,7 @@ load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
-bot = telebot.TeleBot('1894033956:AAGkD_yFVqY4E1s2-Qinw3hnTtuCsTzDSxs')
+bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
 INPUT_DICT = {}
 
