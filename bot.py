@@ -30,7 +30,7 @@ def send_start(message):
 
 def process_search_step(message):
     try:
-        search_object = message.text
+        search_object = str(message.text).strip()
         INPUT_DICT[message.from_user.id]['search_object'] = search_object
         bot.reply_to(message, 'Примеры ввода: sankt-peterburg, rossiya, moskva')
         msg = bot.reply_to(message, 'Введите город')
@@ -41,7 +41,7 @@ def process_search_step(message):
 
 def process_city_step(message):
     try:
-        city = message.text
+        city = str(message.text).strip()
         if city == '-':
             city = ''
         INPUT_DICT[message.from_user.id]['city'] = city
@@ -53,8 +53,8 @@ def process_city_step(message):
 
 def process_min_step(message):
     try:
-        min_price = message.text
-        if min_price == '-':
+        min_price = str(message.text).strip()
+        if min_price == '-' or not str(min_price).isdigit():
             min_price = ''
         INPUT_DICT[message.from_user.id]['min_price'] = min_price
         msg = bot.reply_to(message, 'макс. цена')
@@ -65,8 +65,8 @@ def process_min_step(message):
 
 def process_max_step(message):
     try:
-        max_price = message.text
-        if max_price == '-':
+        max_price = str(message.text).strip()
+        if max_price == '-' or not str(max_price).isdigit():
             max_price = ''
         INPUT_DICT[message.from_user.id]['max_price'] = max_price
         bot.reply_to(
@@ -80,8 +80,8 @@ def process_max_step(message):
 
 def process_max_object_step(message):
     try:
-        max_object = message.text
-        if max_object == '-':
+        max_object = str(message.text).strip()
+        if max_object == '-' or not str(max_object).isdigit():
             max_object = None
         INPUT_DICT[message.from_user.id]['max_object'] = max_object
         msg = bot.reply_to(message, '/parse  -  начать пасринг')
@@ -108,7 +108,7 @@ def send_parse_result(message):
     ).search_object(
         input_dict.get('search_object')
     ).get().parse()
-    [bot.reply_to(message, ''.join(str(res))) for res in result[:input_dict['max_object']]]
+    [bot.reply_to(message, ''.join(str(res))) for res in result[:int(input_dict.get('max_object'))]]
 
 
 bot.polling(none_stop=True, interval=1)
