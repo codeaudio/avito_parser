@@ -52,8 +52,6 @@ def process_city_step(message):
 
 
 def process_min_step(message):
-    if message.text == '/start':
-        return send_start
     try:
         min_price = str(message.text).strip()
         if min_price == '-' or not str(min_price).isdigit():
