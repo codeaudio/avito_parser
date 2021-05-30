@@ -14,7 +14,7 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 INPUT_DICT = {}
 
 
-@bot.message_handler(commands=['help', 'start'])
+@bot.message_handler(commands=['start'])
 def send_start(message):
     bot.reply_to(
         message,
@@ -74,7 +74,7 @@ def process_max_step(message):
         bot.register_next_step_handler(e, send_parse_result)
 
 
-@bot.message_handler(commands=['help', 'parse'])
+@bot.message_handler(commands=['parse'])
 def send_parse_result(message):
     parse = Avito()
     result = parse.city(INPUT_DICT.get('city')).min_price(INPUT_DICT.get('min_price')).max_price(
