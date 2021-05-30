@@ -52,6 +52,8 @@ def process_city_step(message):
 
 
 def process_min_step(message):
+    if message.text == '/start':
+        return send_start
     try:
         min_price = str(message.text).strip()
         if min_price == '-' or not str(min_price).isdigit():
@@ -83,6 +85,8 @@ def process_max_object_step(message):
         max_object = str(message.text).strip()
         if max_object == '-' or not str(max_object).isdigit():
             max_object = None
+        else:
+            max_object = int(max_object)
         INPUT_DICT[message.from_user.id]['max_object'] = max_object
         msg = bot.reply_to(message, '/parse  -  начать пасринг')
         bot.register_next_step_handler(msg, send_parse_result)
@@ -108,7 +112,7 @@ def send_parse_result(message):
     ).search_object(
         input_dict.get('search_object')
     ).get().parse()
-    [bot.reply_to(message, ''.join(str(res))) for res in result[:int(input_dict.get('max_object'))]]
+    [bot.reply_to(message, ''.join(str(res))) for res in result[:input_dict.get('max_object')]]
 
 
 bot.polling(none_stop=True, interval=1)
