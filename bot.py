@@ -1,13 +1,15 @@
-import os
-
 import telebot
 from dotenv import load_dotenv
+from telebot import apihelper
 
 from avitoparser import Avito
+from config import POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT, TELEGRAM_TOKEN
 
 load_dotenv()
 
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+apihelper.proxy = {
+    'https': f'socks5://{POXY_LOGIN}:{PROXY_PASS}@{PROXY_IP}:{PROXY_PORT}'
+}
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
@@ -122,4 +124,4 @@ def send_parse_result(message):
     [bot.reply_to(message, ''.join(str(res))) for res in result[:input_dict.get('max_object')]]
 
 
-bot.polling(none_stop=True, interval=1)
+bot.polling(none_stop=True, timeout=300)
