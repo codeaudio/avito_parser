@@ -60,3 +60,4 @@ class Avito(Base):
         except IndexError:
             pass
         return result
+
