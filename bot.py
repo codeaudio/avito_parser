@@ -14,15 +14,24 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 INPUT_DICT = {}
 
 
+@bot.message_handler(commands=['help'])
+def help_message(message):
+    bot.send_message(
+        message.chat.id,
+        "/start - запуск ввода данных для поиска \n"
+        "/parse - запуск парсинга после ввода/последний запрос юзера"
+    )
+
+
 @bot.message_handler(commands=['start'])
 def send_start(message):
     INPUT_DICT[message.from_user.id] = {}
     bot.reply_to(
         message,
-        "Это парсер Авито. Заоплните данные посика. "
+        "Это парсер Авито. Заполните данные поиска. "
         "Обязательное поле - объект поиска. "
-        "Необязательные - мин. цена, макс. цена, город, кол-во обявлений."
-        " Минус(-) - пропустить необязательное поле "
+        "Необязательные - мин. цена, макс. цена, город, кол-во объявлений."
+        " Минус(-) - пропустить необязательное поле. "
     )
     msg = bot.reply_to(message, "Введите объект поиcка")
     bot.register_next_step_handler(msg, process_search_step)
@@ -75,7 +84,7 @@ def process_max_step(message):
         msg = bot.reply_to(message, 'кол-во объявлений')
         bot.register_next_step_handler(msg, process_max_object_step)
     except Exception as e:
-        bot.register_next_step_handler(e, process_max_object_step)
+        bot.register_next_step_handler(e, 'ошибка')
 
 
 def process_max_object_step(message):
@@ -86,10 +95,10 @@ def process_max_object_step(message):
         else:
             max_object = int(max_object)
         INPUT_DICT[message.from_user.id]['max_object'] = max_object
-        msg = bot.reply_to(message, '/parse  -  начать пасринг')
+        msg = bot.reply_to(message, '/parse  -  начать парсинг')
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
-        bot.register_next_step_handler(e, send_parse_result)
+        bot.register_next_step_handler(e, 'ошибка')
 
 
 @bot.message_handler(commands=['parse'])
@@ -98,7 +107,7 @@ def send_parse_result(message):
     try:
         INPUT_DICT[message.from_user.id]
     except KeyError:
-        bot.reply_to(message, 'вы еще не отправляли запросы')
+        bot.reply_to(message, 'Последний запрос не найден.')
         return None
     input_dict = INPUT_DICT[message.from_user.id]
     result = parse.city(
