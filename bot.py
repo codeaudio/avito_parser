@@ -16,7 +16,7 @@ INPUT_DICT = {}
 @bot.message_handler(commands=['help'])
 def help_message(message):
     bot.send_message(
-        message.chat.id,
+        message.from_user.id,
         "/start - запуск ввода данных для поиска \n"
         "/parse - запуск парсинга после ввода/последний запрос юзера"
     )
@@ -25,14 +25,14 @@ def help_message(message):
 @bot.message_handler(commands=['start'])
 def send_start(message):
     INPUT_DICT[message.from_user.id] = {}
-    bot.reply_to(
-        message,
+    bot.send_message(
+        message.from_user.id,
         "Это парсер Авито. Заполните данные поиска. "
         "Обязательное поле - объект поиска. "
         "Необязательные - мин. цена, макс. цена, город, кол-во объявлений."
         " Минус(-) - пропустить необязательное поле. "
     )
-    msg = bot.reply_to(message, "Введите объект поиcка")
+    msg = bot.send_message(message.from_user.id, "Введите объект поиcка")
     bot.register_next_step_handler(msg, process_search_step)
 
 
@@ -40,7 +40,7 @@ def process_search_step(message):
     try:
         search_object = str(message.text).strip()
         INPUT_DICT[message.from_user.id]['search_object'] = search_object
-        bot.reply_to(message, 'Примеры ввода: sankt-peterburg, rossiya, moskva')
+        bot.send_message(message.from_user.id, 'Примеры ввода: sankt-peterburg, rossiya, moskva')
         msg = bot.reply_to(message, 'Введите город')
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
@@ -77,8 +77,8 @@ def process_max_step(message):
         if max_price == '-' or not str(max_price).isdigit():
             max_price = ''
         INPUT_DICT[message.from_user.id]['max_price'] = max_price
-        bot.reply_to(
-            message, 'Кол-во объявлений. Минус(-) - все объявления на странице'
+        bot.send_message(
+            message.from_user.id, 'Кол-во объявлений. Минус(-) - все объявления на странице'
         )
         msg = bot.reply_to(message, 'кол-во объявлений')
         bot.register_next_step_handler(msg, process_max_object_step)
@@ -94,7 +94,7 @@ def process_max_object_step(message):
         else:
             max_object = int(max_object)
         INPUT_DICT[message.from_user.id]['max_object'] = max_object
-        msg = bot.reply_to(message, '/parse  -  начать парсинг')
+        msg = bot.send_message(message.from_user.id, '/parse  -  начать парсинг')
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
         bot.register_next_step_handler(e, 'ошибка')
@@ -106,7 +106,7 @@ def send_parse_result(message):
     try:
         INPUT_DICT[message.from_user.id]
     except KeyError:
-        bot.reply_to(message, 'Последний запрос не найден.')
+        bot.send_message(message.from_user.id, 'Последний запрос не найден.')
         return None
     input_dict = INPUT_DICT[message.from_user.id]
     result = parse.city(
@@ -118,7 +118,7 @@ def send_parse_result(message):
     ).search_object(
         input_dict.get('search_object')
     ).get().parse()
-    [bot.reply_to(message, ''.join(str(res))) for res in result[:input_dict.get('max_object')]]
+    [bot.send_message(message.from_user.id, ''.join(str(res))) for res in result[:input_dict.get('max_object')]]
 
 
 bot.polling(none_stop=True, timeout=300)
