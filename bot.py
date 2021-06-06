@@ -1,5 +1,6 @@
 import telebot
 from telebot import apihelper
+from pytils.translit import slugify
 
 from avitoparser import Avito
 from config import POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT, TELEGRAM_TOKEN
@@ -40,7 +41,11 @@ def process_search_step(message):
     try:
         search_object = str(message.text).strip()
         INPUT_DICT[message.from_user.id]['search_object'] = search_object
-        bot.send_message(message.from_user.id, 'Примеры ввода: sankt-peterburg, rossiya, moskva')
+        bot.send_message(
+            message.from_user.id,
+            'Примеры ввода: sankt-peterburg/санкт-петербург, '
+            'rossiya/россия, moskva/москва'
+        )
         msg = bot.reply_to(message, 'Введите город')
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
@@ -52,7 +57,7 @@ def process_city_step(message):
         city = str(message.text).strip()
         if city == '-':
             city = ''
-        INPUT_DICT[message.from_user.id]['city'] = city
+        INPUT_DICT[message.from_user.id]['city'] = slugify(city)
         msg = bot.reply_to(message, 'мин. цена')
         bot.register_next_step_handler(msg, process_min_step)
     except Exception as e:
@@ -118,7 +123,8 @@ def send_parse_result(message):
     ).search_object(
         input_dict.get('search_object')
     ).get().parse()
-    [bot.send_message(message.from_user.id, ''.join(str(res))) for res in result[:input_dict.get('max_object')]]
+    for res in result[:input_dict.get('max_object')]:
+        bot.send_message(message.from_user.id, ''.join(str(res)))
 
 
 bot.polling(none_stop=True, timeout=300)
