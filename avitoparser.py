@@ -1,21 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 
+from config import AVITO_HEADERS, AVITO_URL
 from htmlclass import A_CLASS, DIV_CLASS, SPAN_CLASS
 
 
 class Base:
-    BASE_URL = 'https://www.avito.ru/'
+    BASE_URL = AVITO_URL
 
-    headers = {
-        'User-Agent': (
-            'Mozilla/5.0 '
-            '(Windows NT 10.0; Win64; x64) '
-            'AppleWebKit/537.36'
-            ' (KHTML, like Gecko) '
-            'Chrome/89.0.4389.82 Safari/537.36'
-        )
-    }
+    headers = AVITO_HEADERS
 
     def city(self, city):
         self.city = city
