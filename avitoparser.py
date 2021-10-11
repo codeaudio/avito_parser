@@ -1,3 +1,5 @@
+from logging import log, WARNING
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -50,6 +52,6 @@ class Avito(Base):
         ]
         try:
             [result[i].append([text[i].text]) for i in range(0, len(result[0]))]
-        except IndexError:
-            pass
+        except IndexError as e:
+            log(level=WARNING, msg=e)
         return result
