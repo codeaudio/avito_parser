@@ -1,3 +1,5 @@
+from logging import log, WARNING
+
 import telebot
 from telebot import apihelper
 from pytils.translit import slugify
@@ -110,9 +112,10 @@ def send_parse_result(message):
     parse = Avito()
     try:
         INPUT_DICT[message.from_user.id]
-    except KeyError:
+    except KeyError as e:
         bot.send_message(message.from_user.id, 'Последний запрос не найден.')
-        return None
+        log(level=WARNING, msg=e)
+        return
     input_dict = INPUT_DICT[message.from_user.id]
     result = parse.city(
         input_dict.get('city')
@@ -127,4 +130,4 @@ def send_parse_result(message):
         bot.send_message(message.from_user.id, ''.join(str(res)))
 
 
-bot.polling(none_stop=True, timeout=300)
+bot.infinity_polling(timeout=1000, long_polling_timeout=2000)
