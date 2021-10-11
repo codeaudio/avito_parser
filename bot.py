@@ -1,4 +1,4 @@
-from logging import log, WARNING
+from logging import log, WARNING, ERROR
 
 import telebot
 from telebot import apihelper
@@ -51,6 +51,7 @@ def process_search_step(message):
         msg = bot.reply_to(message, 'Введите город')
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
+        log(level=ERROR, msg=e)
         bot.reply_to(e, 'ошибка')
 
 
@@ -63,6 +64,7 @@ def process_city_step(message):
         msg = bot.reply_to(message, 'мин. цена')
         bot.register_next_step_handler(msg, process_min_step)
     except Exception as e:
+        log(level=ERROR, msg=e)
         bot.reply_to(e, 'ошибка')
 
 
@@ -75,6 +77,7 @@ def process_min_step(message):
         msg = bot.reply_to(message, 'макс. цена')
         bot.register_next_step_handler(msg, process_max_step)
     except Exception as e:
+        log(level=ERROR, msg=e)
         bot.reply_to(e, 'ошибка')
 
 
@@ -90,6 +93,7 @@ def process_max_step(message):
         msg = bot.reply_to(message, 'кол-во объявлений')
         bot.register_next_step_handler(msg, process_max_object_step)
     except Exception as e:
+        log(level=ERROR, msg=e)
         bot.register_next_step_handler(e, 'ошибка')
 
 
@@ -104,6 +108,7 @@ def process_max_object_step(message):
         msg = bot.send_message(message.from_user.id, '/parse  -  начать парсинг')
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
+        log(level=ERROR, msg=e)
         bot.register_next_step_handler(e, 'ошибка')
 
 
