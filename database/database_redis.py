@@ -1,7 +1,7 @@
 from redis import StrictRedis
 
 
-class Redis(StrictRedis):
+class Redis:
     def __init__(self, host, port, password):
         self.host = host
         self.port = port
