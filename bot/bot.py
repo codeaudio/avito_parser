@@ -5,9 +5,10 @@ from telebot import apihelper
 from pytils.translit import slugify
 
 from avitoparser import Avito
-from database_redis import Redis
+from database.database_redis import Redis
 
-from config import POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT, TELEGRAM_TOKEN, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD
+from config.config import (POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT,
+                           TELEGRAM_TOKEN, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
 
 apihelper.proxy = {
     'https': f'socks5://{POXY_LOGIN}:{PROXY_PASS}@{PROXY_IP}:{PROXY_PORT}'
@@ -16,6 +17,7 @@ apihelper.proxy = {
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
 redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
+
 
 @bot.message_handler(commands=['help'])
 def help_message(message):

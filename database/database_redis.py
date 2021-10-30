@@ -1,14 +1,14 @@
-import redis
+from redis import StrictRedis
 
 
-class Redis:
+class Redis(StrictRedis):
     def __init__(self, host, port, password):
         self.host = host
         self.port = port
         self.password = password
 
     def connect(self):
-        return redis.StrictRedis(
+        return StrictRedis(
             host=self.host,
             port=self.port,
             password=self.password,
