@@ -1,4 +1,6 @@
-from logging import log, WARNING, ERROR
+from logging import ERROR, WARNING
+
+from logger import log
 
 import telebot
 from telebot import apihelper
@@ -23,8 +25,8 @@ INPUT_DICT = {}
 def help_message(message):
     bot.send_message(
         message.from_user.id,
-        "/start - запуск ввода данных для поиска \n"
-        "/parse - запуск парсинга после ввода/последний запрос юзера"
+        '/start - запуск ввода данных для поиска \n'
+        '/parse - запуск парсинга после ввода/последний запрос юзера'
     )
 
 
@@ -32,19 +34,19 @@ def help_message(message):
 def send_start(message):
     bot.send_message(
         message.from_user.id,
-        "Это парсер Авито. Заполните данные поиска. "
-        "Обязательное поле - объект поиска. "
-        "Необязательные - мин. цена, макс. цена, город, кол-во объявлений."
-        " Минус(-) - пропустить необязательное поле. "
+        'Это парсер Авито. Заполните данные поиска. '
+        'Обязательное поле - объект поиска. '
+        'Необязательные - мин. цена, макс. цена, город, кол-во объявлений.'
+        ' Минус(-) - пропустить необязательное поле. '
     )
-    msg = bot.send_message(message.from_user.id, "Введите объект поиска")
+    msg = bot.send_message(message.from_user.id, 'Введите объект поиска')
     bot.register_next_step_handler(msg, process_search_step)
 
 
 def process_search_step(message):
     try:
         search_object = str(message.text).strip()
-        redis.connect().hmset(message.from_user.id, {"search_object": search_object})
+        redis.connect().hmset(message.from_user.id, {'search_object': search_object})
         bot.send_message(
             message.from_user.id,
             'Примеры ввода: sankt-peterburg/санкт-петербург, '
@@ -53,7 +55,7 @@ def process_search_step(message):
         msg = bot.reply_to(message, 'Введите город')
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
-        log(level=ERROR, msg=e)
+        log.error(msg=e)
         bot.reply_to(e, 'ошибка')
 
 
@@ -62,11 +64,11 @@ def process_city_step(message):
         city = str(message.text).strip()
         if city == '-':
             city = ''
-        redis.connect().hmset(message.from_user.id, {"city": slugify(city)})
+        redis.connect().hmset(message.from_user.id, {'city': slugify(city)})
         msg = bot.reply_to(message, 'мин. цена')
         bot.register_next_step_handler(msg, process_min_step)
     except Exception as e:
-        log(level=ERROR, msg=e)
+        log.error(msg=e)
         bot.reply_to(e, 'ошибка')
 
 
@@ -75,11 +77,11 @@ def process_min_step(message):
         min_price = str(message.text).strip()
         if min_price == '-' or not str(min_price).isdigit():
             min_price = ''
-        redis.connect().hmset(message.from_user.id, {"min_price": min_price})
+        redis.connect().hmset(message.from_user.id, {'min_price': min_price})
         msg = bot.reply_to(message, 'макс. цена')
         bot.register_next_step_handler(msg, process_max_step)
     except Exception as e:
-        log(level=ERROR, msg=e)
+        log.error(msg=e)
         bot.reply_to(e, 'ошибка')
 
 
@@ -88,14 +90,14 @@ def process_max_step(message):
         max_price = str(message.text).strip()
         if max_price == '-' or not str(max_price).isdigit():
             max_price = ''
-        redis.connect().hmset(message.from_user.id, {"max_price": max_price})
+        redis.connect().hmset(message.from_user.id, {'max_price': max_price})
         bot.send_message(
             message.from_user.id, 'Кол-во объявлений. Минус(-) - все объявления на странице'
         )
         msg = bot.reply_to(message, 'кол-во объявлений')
         bot.register_next_step_handler(msg, process_max_object_step)
     except Exception as e:
-        log(level=ERROR, msg=e)
+        log.error(msg=e)
         bot.register_next_step_handler(e, 'ошибка')
 
 
@@ -106,12 +108,12 @@ def process_max_object_step(message):
             max_object = ''
         else:
             max_object = int(max_object)
-        redis.connect().hmset(message.from_user.id, {"max_object": max_object})
+        redis.connect().hmset(message.from_user.id, {'max_object': max_object})
         msg = bot.send_message(message.from_user.id, '/parse  -  начать парсинг')
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
-        log(level=ERROR, msg=e)
-        bot.send_message(e, 'ошибка')
+        log.error(msg=e)
+        bot.send_message(message.from_user.id, 'ошибка')
 
 
 @bot.message_handler(commands=['parse'])
@@ -120,9 +122,8 @@ def send_parse_result(message):
     try:
         redis.connect().hgetall(message.from_user.id)
     except KeyError as e:
-        bot.send_message(message.from_user.id, 'Последний запрос не найден.')
-        log(level=WARNING, msg=e)
-        return
+        log.warning(msg=e)
+        return bot.send_message(message.from_user.id, 'Последний запрос не найден.')
     input_dict = redis.connect().hgetall(message.from_user.id)
     result = parse.city(
         input_dict.get('city')
@@ -133,6 +134,8 @@ def send_parse_result(message):
     ).search_object(
         input_dict.get('search_object')
     ).get().parse()
+    if len(result) == 0:
+        return bot.send_message(message.from_user.id, "Ничего не найдено")
     limit = input_dict.get('max_object')
     limit = int(limit) if str(limit).isdigit() else None
     for res in result[:limit]:
