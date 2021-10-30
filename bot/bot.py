@@ -126,7 +126,7 @@ def send_parse_result(message):
         redis.connect().hgetall(message.from_user.id)
     except KeyError as e:
         log.warning(msg=e)
-        return bot.send_message(message.from_user.id, 'Последний запрос не найден.')
+        return bot.send_message(message.from_user.id, 'Последний запрос не найден')
     input_dict = redis.connect().hgetall(message.from_user.id)
     result = parse.city(
         input_dict.get('city')
