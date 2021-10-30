@@ -10,7 +10,7 @@ from config.htmlclass import A_CLASS, DIV_CLASS, SPAN_CLASS
 class Base:
     BASE_URL = AVITO_URL
 
-    headers = AVITO_HEADERS
+    HEADERS = AVITO_HEADERS
 
     def city(self, city):
         self.city = city
@@ -37,7 +37,7 @@ class Avito(Base):
             f'{"pmin=" + str(self.min_price)}'
             f'{"&pmax=" + str(self.max_price)}'
             f'{"&q=" + str(self.search_object)}',
-            headers=self.headers
+            headers=self.HEADERS
         )
         return self
 
