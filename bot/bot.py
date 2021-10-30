@@ -136,6 +136,7 @@ def send_parse_result(message):
         input_dict.get('search_object')
     ).get().parse()
     if len(result) == 0:
+        log.warning(msg=(parse.__class__.__name__, result))
         return bot.send_message(message.from_user.id, "Ничего не найдено")
     limit = input_dict.get('max_object')
     limit = int(limit) if str(limit).isdigit() else None
