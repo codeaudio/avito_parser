@@ -32,7 +32,7 @@ class Base:
 class Avito(Base):
     def get(self):
         self.response = requests.get(
-            f'{self.BASE_URL}'
+            self.BASE_URL +
             f'{str(self.city) + "?"}'
             f'{"pmin=" + str(self.min_price)}'
             f'{"&pmax=" + str(self.max_price)}'
