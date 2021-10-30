@@ -1,14 +1,12 @@
-from logger import log
-
 import telebot
-from telebot import apihelper
 from pytils.translit import slugify
+from telebot import apihelper
 
 from avitoparser import Avito
-from database.database_redis import Redis
-
 from config.config import (POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT,
                            TELEGRAM_TOKEN, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
+from database.database_redis import Redis
+from logger import log
 
 apihelper.proxy = {
     'https': f'socks5://{POXY_LOGIN}:{PROXY_PASS}@{PROXY_IP}:{PROXY_PORT}'
