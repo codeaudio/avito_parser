@@ -1,5 +1,3 @@
-from logging import ERROR, WARNING
-
 from logger import log
 
 import telebot
@@ -53,6 +51,7 @@ def process_search_step(message):
             'rossiya/россия, moskva/москва'
         )
         msg = bot.reply_to(message, 'Введите город')
+        log.info((message.from_user.id, str({'search_object': search_object})))
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
         log.error(msg=e)
@@ -66,6 +65,7 @@ def process_city_step(message):
             city = ''
         redis.connect().hmset(message.from_user.id, {'city': slugify(city)})
         msg = bot.reply_to(message, 'мин. цена')
+        log.info((message.from_user.id, str({'city': city})))
         bot.register_next_step_handler(msg, process_min_step)
     except Exception as e:
         log.error(msg=e)
@@ -79,6 +79,7 @@ def process_min_step(message):
             min_price = ''
         redis.connect().hmset(message.from_user.id, {'min_price': min_price})
         msg = bot.reply_to(message, 'макс. цена')
+        log.info((message.from_user.id, str({'min_price': min_price})))
         bot.register_next_step_handler(msg, process_max_step)
     except Exception as e:
         log.error(msg=e)
@@ -95,6 +96,7 @@ def process_max_step(message):
             message.from_user.id, 'Кол-во объявлений. Минус(-) - все объявления на странице'
         )
         msg = bot.reply_to(message, 'кол-во объявлений')
+        log.info((message.from_user.id, str({'max_price': max_price})))
         bot.register_next_step_handler(msg, process_max_object_step)
     except Exception as e:
         log.error(msg=e)
@@ -110,6 +112,7 @@ def process_max_object_step(message):
             max_object = int(max_object)
         redis.connect().hmset(message.from_user.id, {'max_object': max_object})
         msg = bot.send_message(message.from_user.id, '/parse  -  начать парсинг')
+        log.info((message.from_user.id, str({'max_object': max_object})))
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
         log.error(msg=e)
@@ -140,6 +143,7 @@ def send_parse_result(message):
     limit = int(limit) if str(limit).isdigit() else None
     for res in result[:limit]:
         bot.send_message(message.from_user.id, ''.join(map(str, res)))
+    log.info((message.from_user.id, str(result)))
 
 
 bot.infinity_polling(timeout=1000, long_polling_timeout=2000)
