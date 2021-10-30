@@ -142,7 +142,7 @@ def send_parse_result(message):
     limit = input_dict.get('max_object')
     limit = int(limit) if str(limit).isdigit() else None
     for res in result[:limit]:
-        if len(res) > 2 and len(res[-1]) > 3900: res[-1] = res[-1][:3900] + '...'
+        if len(res) > 2 and len(res[-1]) > 3900: res[-1] = res[-1][::3900] + '...'
         bot.send_message(message.from_user.id, '\n'.join(map(str, res)))
     log.info((message.from_user.id, str(result)))
 
