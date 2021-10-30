@@ -22,7 +22,8 @@ def help_message(message):
     bot.send_message(
         message.from_user.id,
         '/start - запуск ввода данных для поиска \n'
-        '/parse - запуск парсинга после ввода/последний запрос юзера'
+        '/parse - запуск парсинга после ввода/последний запрос юзера \n'
+        'вернуться назад можно, если написать название предведущего шага. Всего 5 шагов. Пример: второй шаг '
     )
 
 
@@ -39,78 +40,108 @@ def send_start(message):
     bot.register_next_step_handler(msg, process_search_step)
 
 
-def process_search_step(message):
+def process_search_step(message, retry=False):
     try:
-        search_object = str(message.text).strip()
-        redis.connect().hmset(message.from_user.id, {'search_object': search_object})
-        bot.send_message(
-            message.from_user.id,
-            'Примеры ввода: sankt-peterburg/санкт-петербург, '
-            'rossiya/россия, moskva/москва'
-        )
+        if not retry:
+            search_object = str(message.text).strip()
+            redis.connect().hmset(message.from_user.id, {'search_object': search_object})
+            bot.send_message(
+                message.from_user.id,
+                'Примеры ввода: sankt-peterburg/санкт-петербург, '
+                'rossiya/россия, moskva/москва\n'
+                'Если хотите вернуться назад, то напишите первый шаг'
+            )
+            log.info((message.from_user.id, str({'search_object': search_object})))
         msg = bot.reply_to(message, 'Введите город')
-        log.info((message.from_user.id, str({'search_object': search_object})))
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
         log.error(msg=e)
         bot.reply_to(e, 'ошибка')
 
 
-def process_city_step(message):
+def process_city_step(message, retry=False):
+    if str(message.text).lower() in ['первый шаг']:
+        return send_start(message)
     try:
-        city = str(message.text).strip()
-        if city == '-':
-            city = ''
-        redis.connect().hmset(message.from_user.id, {'city': slugify(city)})
+        if not retry:
+            city = str(message.text).strip()
+            if city == '-':
+                city = ''
+            redis.connect().hmset(message.from_user.id, {'city': slugify(city)})
+            log.info((message.from_user.id, str({'city': city})))
+        bot.send_message(
+            message.from_user.id,
+            'Если хотите вернуться назад, то напишите второй шаг'
+        )
         msg = bot.reply_to(message, 'мин. цена')
-        log.info((message.from_user.id, str({'city': city})))
         bot.register_next_step_handler(msg, process_min_step)
     except Exception as e:
         log.error(msg=e)
         bot.reply_to(e, 'ошибка')
 
 
-def process_min_step(message):
+def process_min_step(message, retry=False):
+    if str(message.text).lower() in ['второй шаг']:
+        return process_search_step(message, True)
     try:
-        min_price = str(message.text).strip()
-        if min_price == '-' or not str(min_price).isdigit():
-            min_price = ''
-        redis.connect().hmset(message.from_user.id, {'min_price': min_price})
+        if not retry:
+            min_price = str(message.text).strip()
+            if min_price == '-' or not str(min_price).isdigit():
+                min_price = ''
+            redis.connect().hmset(message.from_user.id, {'min_price': min_price})
+            log.info((message.from_user.id, str({'min_price': min_price})))
+        bot.send_message(
+            message.from_user.id,
+            'Если хотите вернуться назад, то напишите третий шаг'
+        )
         msg = bot.reply_to(message, 'макс. цена')
-        log.info((message.from_user.id, str({'min_price': min_price})))
         bot.register_next_step_handler(msg, process_max_step)
     except Exception as e:
         log.error(msg=e)
         bot.reply_to(e, 'ошибка')
 
 
-def process_max_step(message):
+def process_max_step(message, retry=False):
+    if str(message.text).lower() in ['третий шаг']:
+        return process_city_step(message, True)
     try:
-        max_price = str(message.text).strip()
-        if max_price == '-' or not str(max_price).isdigit():
-            max_price = ''
-        redis.connect().hmset(message.from_user.id, {'max_price': max_price})
+        if not retry:
+            max_price = str(message.text).strip()
+            if max_price == '-' or not str(max_price).isdigit():
+                max_price = ''
+            redis.connect().hmset(message.from_user.id, {'max_price': max_price})
+            log.info((message.from_user.id, str({'max_price': max_price})))
+        bot.send_message(
+            message.from_user.id,
+            'Если хотите вернуться назад, то напишите четвертый шаг'
+        )
         bot.send_message(
             message.from_user.id, 'Кол-во объявлений. Минус(-) - все объявления на странице'
         )
         msg = bot.reply_to(message, 'кол-во объявлений')
-        log.info((message.from_user.id, str({'max_price': max_price})))
         bot.register_next_step_handler(msg, process_max_object_step)
     except Exception as e:
         log.error(msg=e)
         bot.register_next_step_handler(e, 'ошибка')
 
 
-def process_max_object_step(message):
+def process_max_object_step(message, retry=False):
+    if str(message.text).lower() in ['четвертый шаг']:
+        return process_min_step(message, True)
     try:
-        max_object = str(message.text).strip()
-        if max_object == '-' or not str(max_object).isdigit():
-            max_object = ''
-        else:
-            max_object = int(max_object)
-        redis.connect().hmset(message.from_user.id, {'max_object': max_object})
+        if not retry:
+            max_object = str(message.text).strip()
+            if max_object == '-' or not str(max_object).isdigit():
+                max_object = ''
+            else:
+                max_object = int(max_object)
+            redis.connect().hmset(message.from_user.id, {'max_object': max_object})
+            log.info((message.from_user.id, str({'max_object': max_object})))
+        bot.send_message(
+            message.from_user.id,
+            'Если хотите вернуться назад, то напишите пятый шаг'
+        )
         msg = bot.send_message(message.from_user.id, '/parse  -  начать парсинг')
-        log.info((message.from_user.id, str({'max_object': max_object})))
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
         log.error(msg=e)
@@ -119,6 +150,8 @@ def process_max_object_step(message):
 
 @bot.message_handler(commands=['parse'])
 def send_parse_result(message):
+    if str(message.text).lower() in ['пятый шаг']:
+        return process_max_step(message, True)
     parse = Avito()
     try:
         redis.connect().hgetall(message.from_user.id)
