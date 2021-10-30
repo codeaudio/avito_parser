@@ -5,7 +5,9 @@ from telebot import apihelper
 from pytils.translit import slugify
 
 from avitoparser import Avito
-from config import POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT, TELEGRAM_TOKEN
+from database_redis import Redis
+
+from config import POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT, TELEGRAM_TOKEN, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD
 
 apihelper.proxy = {
     'https': f'socks5://{POXY_LOGIN}:{PROXY_PASS}@{PROXY_IP}:{PROXY_PORT}'
@@ -13,6 +15,7 @@ apihelper.proxy = {
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
+redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
 INPUT_DICT = {}
 
 
@@ -27,7 +30,6 @@ def help_message(message):
 
 @bot.message_handler(commands=['start'])
 def send_start(message):
-    INPUT_DICT[message.from_user.id] = {}
     bot.send_message(
         message.from_user.id,
         "Это парсер Авито. Заполните данные поиска. "
@@ -42,7 +44,7 @@ def send_start(message):
 def process_search_step(message):
     try:
         search_object = str(message.text).strip()
-        INPUT_DICT[message.from_user.id]['search_object'] = search_object
+        redis.connect().hmset(message.from_user.id, {"search_object": search_object})
         bot.send_message(
             message.from_user.id,
             'Примеры ввода: sankt-peterburg/санкт-петербург, '
@@ -60,7 +62,7 @@ def process_city_step(message):
         city = str(message.text).strip()
         if city == '-':
             city = ''
-        INPUT_DICT[message.from_user.id]['city'] = slugify(city)
+        redis.connect().hmset(message.from_user.id, {"city": slugify(city)})
         msg = bot.reply_to(message, 'мин. цена')
         bot.register_next_step_handler(msg, process_min_step)
     except Exception as e:
@@ -73,7 +75,7 @@ def process_min_step(message):
         min_price = str(message.text).strip()
         if min_price == '-' or not str(min_price).isdigit():
             min_price = ''
-        INPUT_DICT[message.from_user.id]['min_price'] = min_price
+        redis.connect().hmset(message.from_user.id, {"min_price": min_price})
         msg = bot.reply_to(message, 'макс. цена')
         bot.register_next_step_handler(msg, process_max_step)
     except Exception as e:
@@ -86,7 +88,7 @@ def process_max_step(message):
         max_price = str(message.text).strip()
         if max_price == '-' or not str(max_price).isdigit():
             max_price = ''
-        INPUT_DICT[message.from_user.id]['max_price'] = max_price
+        redis.connect().hmset(message.from_user.id, {"max_price": max_price})
         bot.send_message(
             message.from_user.id, 'Кол-во объявлений. Минус(-) - все объявления на странице'
         )
@@ -104,7 +106,7 @@ def process_max_object_step(message):
             max_object = None
         else:
             max_object = int(max_object)
-        INPUT_DICT[message.from_user.id]['max_object'] = max_object
+        redis.connect().hmset(message.from_user.id, {"max_object": max_object})
         msg = bot.send_message(message.from_user.id, '/parse  -  начать парсинг')
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
@@ -116,12 +118,12 @@ def process_max_object_step(message):
 def send_parse_result(message):
     parse = Avito()
     try:
-        INPUT_DICT[message.from_user.id]
+        redis.connect().hgetall(message.from_user.id)
     except KeyError as e:
         bot.send_message(message.from_user.id, 'Последний запрос не найден.')
         log(level=WARNING, msg=e)
         return
-    input_dict = INPUT_DICT[message.from_user.id]
+    input_dict = redis.connect().hgetall(message.from_user.id)
     result = parse.city(
         input_dict.get('city')
     ).min_price(
@@ -131,8 +133,8 @@ def send_parse_result(message):
     ).search_object(
         input_dict.get('search_object')
     ).get().parse()
-    for res in result[:input_dict.get('max_object')]:
-        bot.send_message(message.from_user.id, ''.join(str(res)))
+    for res in result[:int(input_dict.get('max_object'))]:
+        bot.send_message(message.from_user.id, ''.join(map(str, res)))
 
 
 bot.infinity_polling(timeout=1000, long_polling_timeout=2000)
