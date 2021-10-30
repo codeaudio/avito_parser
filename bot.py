@@ -37,7 +37,7 @@ def send_start(message):
         "Необязательные - мин. цена, макс. цена, город, кол-во объявлений."
         " Минус(-) - пропустить необязательное поле. "
     )
-    msg = bot.send_message(message.from_user.id, "Введите объект поиcка")
+    msg = bot.send_message(message.from_user.id, "Введите объект поиска")
     bot.register_next_step_handler(msg, process_search_step)
 
 
@@ -103,7 +103,7 @@ def process_max_object_step(message):
     try:
         max_object = str(message.text).strip()
         if max_object == '-' or not str(max_object).isdigit():
-            max_object = None
+            max_object = ''
         else:
             max_object = int(max_object)
         redis.connect().hmset(message.from_user.id, {"max_object": max_object})
@@ -111,7 +111,7 @@ def process_max_object_step(message):
         bot.register_next_step_handler(msg, send_parse_result)
     except Exception as e:
         log(level=ERROR, msg=e)
-        bot.register_next_step_handler(e, 'ошибка')
+        bot.send_message(e, 'ошибка')
 
 
 @bot.message_handler(commands=['parse'])
@@ -133,7 +133,9 @@ def send_parse_result(message):
     ).search_object(
         input_dict.get('search_object')
     ).get().parse()
-    for res in result[:int(input_dict.get('max_object'))]:
+    limit = input_dict.get('max_object')
+    limit = int(limit) if str(limit).isdigit() else None
+    for res in result[:limit]:
         bot.send_message(message.from_user.id, ''.join(map(str, res)))
 
 
