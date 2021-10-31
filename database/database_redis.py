@@ -20,10 +20,10 @@ class Redis:
         )
         return self
 
-    def get(self, message):
+    def get(self, message) -> dict:
         return dict(self.__connect.hgetall(message.from_user.id))
 
-    def save(self, message, dictionary):
+    def save(self, message, dictionary: dict) -> None:
         try:
             self.__connect.hmset(message.from_user.id, dictionary)
         except Exception as e:

@@ -41,7 +41,7 @@ class Avito(Base):
         )
         return self
 
-    def parse(self):
+    def parse(self) -> list:
         soup = BeautifulSoup(self.response.text, 'lxml')
         price = soup.find_all('span', class_=SPAN_CLASS)
         text = soup.find_all('div', class_=DIV_CLASS)
