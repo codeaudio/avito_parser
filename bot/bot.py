@@ -152,13 +152,12 @@ def process_max_object_step(message, retry=False):
 def send_parse_result(message):
     if str(message.text).lower().strip() in ['пятый шаг']:
         return process_max_step(message, True)
-    parse = Avito()
     try:
-        redis.get(message)
+        input_dict = redis.get(message)
     except KeyError as e:
         log.warning(msg=e)
         return bot.send_message(message.from_user.id, 'Последний запрос не найден')
-    input_dict = redis.get(message)
+    parse = Avito()
     result = parse.city(
         input_dict.get('city')
     ).min_price(
