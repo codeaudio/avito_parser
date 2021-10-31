@@ -14,7 +14,7 @@ apihelper.proxy = {
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
-redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
+redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)._connect()
 
 
 @bot.message_handler(commands=['help'])

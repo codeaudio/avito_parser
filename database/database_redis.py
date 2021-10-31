@@ -9,25 +9,26 @@ class Redis:
         self.__host = host
         self.__port = port
         self.__password = password
+        self.__connect = None
 
-    @private
-    def __connect(self):
-        return StrictRedis(
+    def _connect(self):
+        self.__connect = StrictRedis(
             host=self.__host,
             port=self.__port,
             password=self.__password,
             charset="utf-8",
             decode_responses=True
         )
+        return self
 
     def get(self, message):
-        return dict(self.__connect().hgetall(message.from_user.id))
+        return dict(self.__connect.hgetall(message.from_user.id))
 
     def save(self, message, dictionary):
         try:
-            self.__connect().hmset(message.from_user.id, dictionary)
+            self.__connect.hmset(message.from_user.id, dictionary)
         except Exception as e:
             log.warning(e)
-            save = dict(self.__connect().get(message.from_user.id))
-            self.__connect().delete(message.from_user.id)
-            self.__connect().hmset(message.from_user.id, dictionary.update(save))
+            save = dict(self.__connect.get(message.from_user.id))
+            self.__connect.delete(message.from_user.id)
+            self.__connect.hmset(message.from_user.id, dictionary.update(save))
