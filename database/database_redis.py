@@ -1,4 +1,3 @@
-from accessify import private
 from redis import StrictRedis
 
 from logger import log
@@ -28,7 +27,7 @@ class Redis:
         try:
             self.__connect.hmset(message.from_user.id, dictionary)
         except Exception as e:
-            log.warning(e)
             save = dict(self.__connect.get(message.from_user.id))
             self.__connect.delete(message.from_user.id)
             self.__connect.hmset(message.from_user.id, dictionary.update(save))
+            log.warning(e)
