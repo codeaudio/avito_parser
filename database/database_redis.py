@@ -27,7 +27,7 @@ class Redis:
         try:
             self.__connect.hmset(message.from_user.id, dictionary)
         except Exception as e:
-            save = dict(self.__connect.get(message.from_user.id))
+            save = self.get(message)
             self.__connect.delete(message.from_user.id)
             self.__connect.hmset(message.from_user.id, dictionary.update(save))
             log.warning(e)
