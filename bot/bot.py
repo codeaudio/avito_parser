@@ -24,7 +24,7 @@ def save(message, dictionary):
         log.warning(e)
         save = dict(redis.connect().get(message.from_user.id))
         redis.connect().delete(message.from_user.id)
-        redis.connect().hmset(message.from_user.id, save.update(dictionary))
+        redis.connect().hmset(message.from_user.id, dictionary.update(save))
 
 
 @bot.message_handler(commands=['help'])
@@ -187,5 +187,6 @@ def send_parse_result(message):
         if len(res) > 2 and len(res[-1]) > 3900: res[-1] = res[-1][:3900] + '...'
         bot.send_message(message.from_user.id, '\n'.join(map(str, res)))
     log.info((message.from_user.id, str(result)))
+
 
 bot.infinity_polling(timeout=1000, long_polling_timeout=2000)
