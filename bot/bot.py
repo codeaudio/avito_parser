@@ -60,7 +60,7 @@ def process_search_step(message, retry=False):
 
 
 def process_city_step(message, retry=False):
-    if str(message.text).lower() in ['первый шаг']:
+    if str(message.text).lower().strip() in ['первый шаг']:
         return send_start(message)
     try:
         if not retry:
@@ -81,7 +81,7 @@ def process_city_step(message, retry=False):
 
 
 def process_min_step(message, retry=False):
-    if str(message.text).lower() in ['второй шаг']:
+    if str(message.text).lower().strip() in ['второй шаг']:
         return process_search_step(message, True)
     try:
         if not retry:
@@ -102,7 +102,7 @@ def process_min_step(message, retry=False):
 
 
 def process_max_step(message, retry=False):
-    if str(message.text).lower() in ['третий шаг']:
+    if str(message.text).lower().strip() in ['третий шаг']:
         return process_city_step(message, True)
     try:
         if not retry:
@@ -126,7 +126,7 @@ def process_max_step(message, retry=False):
 
 
 def process_max_object_step(message, retry=False):
-    if str(message.text).lower() in ['четвертый шаг']:
+    if str(message.text).lower().strip() in ['четвертый шаг']:
         return process_min_step(message, True)
     try:
         if not retry:
@@ -150,7 +150,7 @@ def process_max_object_step(message, retry=False):
 
 @bot.message_handler(commands=['parse'])
 def send_parse_result(message):
-    if str(message.text).lower() in ['пятый шаг']:
+    if str(message.text).lower().strip() in ['пятый шаг']:
         return process_max_step(message, True)
     parse = Avito()
     try:

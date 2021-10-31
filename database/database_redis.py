@@ -15,7 +15,7 @@ class Redis:
             host=self.__host,
             port=self.__port,
             password=self.__password,
-            charset="utf-8",
+            charset='utf-8',
             decode_responses=True
         )
         return self
