@@ -156,24 +156,24 @@ def send_parse_result(message):
     if str(message.text).lower().strip() in ['пятый шаг']:
         return process_max_step(message, True)
     try:
-        input_dict = redis.get(message)
+        output_dict = redis.get(message)
     except KeyError as e:
         log.warning(msg=e)
         return bot.send_message(message.from_user.id, 'Последний запрос не найден')
     parse = Avito()
     result = parse.city(
-        input_dict.get('city')
+        output_dict.get('city')
     ).min_price(
-        input_dict.get('min_price')
+        output_dict.get('min_price')
     ).max_price(
-        input_dict.get('max_price')
+        output_dict.get('max_price')
     ).search_object(
-        input_dict.get('search_object')
+        output_dict.get('search_object')
     ).get().parse()
     if len(result) == 0:
         log.warning(msg=(parse.__class__.__name__, result))
         return bot.send_message(message.from_user.id, "Ничего не найдено")
-    limit = input_dict.get('max_object')
+    limit = output_dict.get('max_object')
     limit = int(limit) if str(limit).isdigit() else None
     for res in result[:limit]:
         if len(res) > 2 and len(res[-1]) > 3900: res[-1] = res[-1][:3900] + '...'
