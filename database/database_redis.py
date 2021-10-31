@@ -4,7 +4,7 @@ from logger import log
 
 
 class Redis:
-    def __init__(self, host, port, password):
+    def __init__(self, host: str, port: str, password: str):
         self.__host = host
         self.__port = port
         self.__password = password
