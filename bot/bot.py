@@ -6,7 +6,7 @@ from avitoparser import Avito
 from config.config import (POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT,
                            TELEGRAM_TOKEN, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
 from database.database_redis import Redis
-from logger import log
+from logger import log, info_logger
 
 apihelper.proxy = {
     'https': f'socks5://{POXY_LOGIN}:{PROXY_PASS}@{PROXY_IP}:{PROXY_PORT}'
@@ -18,6 +18,7 @@ redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)._connect()
 
 
 @bot.message_handler(commands=['help'])
+@info_logger
 def help_message(message):
     bot.send_message(
         message.from_user.id,
@@ -28,6 +29,7 @@ def help_message(message):
 
 
 @bot.message_handler(commands=['start'])
+@info_logger
 def send_start(message):
     bot.send_message(
         message.from_user.id,
@@ -40,6 +42,7 @@ def send_start(message):
     bot.register_next_step_handler(msg, process_search_step)
 
 
+@info_logger
 def process_search_step(message, retry=False):
     try:
         if not retry:
@@ -51,7 +54,6 @@ def process_search_step(message, retry=False):
                 'rossiya/россия, moskva/москва\n'
                 'Если хотите вернуться назад, то напишите первый шаг'
             )
-            log.info((message.from_user.id, str({'search_object': search_object})))
         msg = bot.reply_to(message, 'Введите город')
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
@@ -59,6 +61,7 @@ def process_search_step(message, retry=False):
         bot.reply_to(message, 'ошибка')
 
 
+@info_logger
 def process_city_step(message, retry=False):
     if str(message.text).lower().strip() in ['первый шаг']:
         return send_start(message)
@@ -68,7 +71,6 @@ def process_city_step(message, retry=False):
             if city == '-':
                 city = ''
             redis.save(message, {'city': slugify(city)})
-            log.info((message.from_user.id, str({'city': city})))
         bot.send_message(
             message.from_user.id,
             'Если хотите вернуться назад, то напишите второй шаг'
@@ -80,6 +82,7 @@ def process_city_step(message, retry=False):
         bot.reply_to(message, 'ошибка')
 
 
+@info_logger
 def process_min_step(message, retry=False):
     if str(message.text).lower().strip() in ['второй шаг']:
         return process_search_step(message, True)
@@ -89,7 +92,6 @@ def process_min_step(message, retry=False):
             if min_price == '-' or not str(min_price).isdigit():
                 min_price = ''
             redis.save(message, {'min_price': min_price})
-            log.info((message.from_user.id, str({'min_price': min_price})))
         bot.send_message(
             message.from_user.id,
             'Если хотите вернуться назад, то напишите третий шаг'
@@ -101,6 +103,7 @@ def process_min_step(message, retry=False):
         bot.reply_to(message, 'ошибка')
 
 
+@info_logger
 def process_max_step(message, retry=False):
     if str(message.text).lower().strip() in ['третий шаг']:
         return process_city_step(message, True)
@@ -110,7 +113,6 @@ def process_max_step(message, retry=False):
             if max_price == '-' or not str(max_price).isdigit():
                 max_price = ''
             redis.save(message, {'max_price': max_price})
-            log.info((message.from_user.id, str({'max_price': max_price})))
         bot.send_message(
             message.from_user.id,
             'Если хотите вернуться назад, то напишите четвертый шаг'
@@ -125,6 +127,7 @@ def process_max_step(message, retry=False):
         bot.register_next_step_handler(e, 'ошибка')
 
 
+@info_logger
 def process_max_object_step(message, retry=False):
     if str(message.text).lower().strip() in ['четвертый шаг']:
         return process_min_step(message, True)
@@ -136,7 +139,6 @@ def process_max_object_step(message, retry=False):
             else:
                 max_object = int(max_object)
             redis.save(message, {'max_object': max_object})
-            log.info((message.from_user.id, str({'max_object': max_object})))
         bot.send_message(
             message.from_user.id,
             'Если хотите вернуться назад, то напишите пятый шаг'
@@ -149,6 +151,7 @@ def process_max_object_step(message, retry=False):
 
 
 @bot.message_handler(commands=['parse'])
+@info_logger
 def send_parse_result(message):
     if str(message.text).lower().strip() in ['пятый шаг']:
         return process_max_step(message, True)
