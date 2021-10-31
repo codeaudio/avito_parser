@@ -1,4 +1,7 @@
+from accessify import private
 from redis import StrictRedis
+
+from logger import log
 
 
 class Redis:
@@ -7,7 +10,8 @@ class Redis:
         self.__port = port
         self.__password = password
 
-    def connect(self):
+    @private
+    def __connect(self):
         return StrictRedis(
             host=self.__host,
             port=self.__port,
@@ -15,3 +19,15 @@ class Redis:
             charset="utf-8",
             decode_responses=True
         )
+
+    def get(self, message):
+        return dict(self.__connect().hgetall(message.from_user.id))
+
+    def save(self, message, dictionary):
+        try:
+            self.__connect().hmset(message.from_user.id, dictionary)
+        except Exception as e:
+            log.warning(e)
+            save = dict(self.__connect().get(message.from_user.id))
+            self.__connect().delete(message.from_user.id)
+            self.__connect().hmset(message.from_user.id, dictionary.update(save))

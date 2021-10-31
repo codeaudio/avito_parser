@@ -17,16 +17,6 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
 
 
-def save(message, dictionary):
-    try:
-        redis.connect().hmset(message.from_user.id, dictionary)
-    except Exception as e:
-        log.warning(e)
-        save = dict(redis.connect().get(message.from_user.id))
-        redis.connect().delete(message.from_user.id)
-        redis.connect().hmset(message.from_user.id, dictionary.update(save))
-
-
 @bot.message_handler(commands=['help'])
 def help_message(message):
     bot.send_message(
@@ -54,7 +44,7 @@ def process_search_step(message, retry=False):
     try:
         if not retry:
             search_object = str(message.text).strip()
-            save(message, {'search_object': search_object})
+            redis.save(message, {'search_object': search_object})
             bot.send_message(
                 message.from_user.id,
                 'Примеры ввода: sankt-peterburg/санкт-петербург, '
@@ -77,7 +67,7 @@ def process_city_step(message, retry=False):
             city = str(message.text).strip()
             if city == '-':
                 city = ''
-            save(message, {'city': slugify(city)})
+            redis.save(message, {'city': slugify(city)})
             log.info((message.from_user.id, str({'city': city})))
         bot.send_message(
             message.from_user.id,
@@ -98,7 +88,7 @@ def process_min_step(message, retry=False):
             min_price = str(message.text).strip()
             if min_price == '-' or not str(min_price).isdigit():
                 min_price = ''
-            save(message, {'min_price': min_price})
+            redis.save(message, {'min_price': min_price})
             log.info((message.from_user.id, str({'min_price': min_price})))
         bot.send_message(
             message.from_user.id,
@@ -119,7 +109,7 @@ def process_max_step(message, retry=False):
             max_price = str(message.text).strip()
             if max_price == '-' or not str(max_price).isdigit():
                 max_price = ''
-            save(message, {'max_price': max_price})
+            redis.save(message, {'max_price': max_price})
             log.info((message.from_user.id, str({'max_price': max_price})))
         bot.send_message(
             message.from_user.id,
@@ -145,7 +135,7 @@ def process_max_object_step(message, retry=False):
                 max_object = ''
             else:
                 max_object = int(max_object)
-            save(message, {'max_object': max_object})
+            redis.save(message, {'max_object': max_object})
             log.info((message.from_user.id, str({'max_object': max_object})))
         bot.send_message(
             message.from_user.id,
@@ -164,11 +154,11 @@ def send_parse_result(message):
         return process_max_step(message, True)
     parse = Avito()
     try:
-        redis.connect().hgetall(message.from_user.id)
+        redis.get(message)
     except KeyError as e:
         log.warning(msg=e)
         return bot.send_message(message.from_user.id, 'Последний запрос не найден')
-    input_dict = redis.connect().hgetall(message.from_user.id)
+    input_dict = redis.get(message)
     result = parse.city(
         input_dict.get('city')
     ).min_price(
