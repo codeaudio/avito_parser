@@ -17,6 +17,16 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
 
 
+def save(message, dictionary):
+    try:
+        redis.connect().hmset(message.from_user.id, dictionary)
+    except Exception as e:
+        log.warning(e)
+        save = dict(redis.connect().get(message.from_user.id))
+        redis.connect().delete(message.from_user.id)
+        redis.connect().hmset(message.from_user.id, save.update(dictionary))
+
+
 @bot.message_handler(commands=['help'])
 def help_message(message):
     bot.send_message(
@@ -44,7 +54,7 @@ def process_search_step(message, retry=False):
     try:
         if not retry:
             search_object = str(message.text).strip()
-            redis.connect().hmset(message.from_user.id, {'search_object': search_object})
+            save(message, {'search_object': search_object})
             bot.send_message(
                 message.from_user.id,
                 'Примеры ввода: sankt-peterburg/санкт-петербург, '
@@ -56,7 +66,7 @@ def process_search_step(message, retry=False):
         bot.register_next_step_handler(msg, process_city_step)
     except Exception as e:
         log.error(msg=e)
-        bot.reply_to(e, 'ошибка')
+        bot.reply_to(message, 'ошибка')
 
 
 def process_city_step(message, retry=False):
@@ -67,7 +77,7 @@ def process_city_step(message, retry=False):
             city = str(message.text).strip()
             if city == '-':
                 city = ''
-            redis.connect().hmset(message.from_user.id, {'city': slugify(city)})
+            save(message, {'city': slugify(city)})
             log.info((message.from_user.id, str({'city': city})))
         bot.send_message(
             message.from_user.id,
@@ -77,7 +87,7 @@ def process_city_step(message, retry=False):
         bot.register_next_step_handler(msg, process_min_step)
     except Exception as e:
         log.error(msg=e)
-        bot.reply_to(e, 'ошибка')
+        bot.reply_to(message, 'ошибка')
 
 
 def process_min_step(message, retry=False):
@@ -88,7 +98,7 @@ def process_min_step(message, retry=False):
             min_price = str(message.text).strip()
             if min_price == '-' or not str(min_price).isdigit():
                 min_price = ''
-            redis.connect().hmset(message.from_user.id, {'min_price': min_price})
+            save(message, {'min_price': min_price})
             log.info((message.from_user.id, str({'min_price': min_price})))
         bot.send_message(
             message.from_user.id,
@@ -98,7 +108,7 @@ def process_min_step(message, retry=False):
         bot.register_next_step_handler(msg, process_max_step)
     except Exception as e:
         log.error(msg=e)
-        bot.reply_to(e, 'ошибка')
+        bot.reply_to(message, 'ошибка')
 
 
 def process_max_step(message, retry=False):
@@ -109,7 +119,7 @@ def process_max_step(message, retry=False):
             max_price = str(message.text).strip()
             if max_price == '-' or not str(max_price).isdigit():
                 max_price = ''
-            redis.connect().hmset(message.from_user.id, {'max_price': max_price})
+            save(message, {'max_price': max_price})
             log.info((message.from_user.id, str({'max_price': max_price})))
         bot.send_message(
             message.from_user.id,
@@ -135,7 +145,7 @@ def process_max_object_step(message, retry=False):
                 max_object = ''
             else:
                 max_object = int(max_object)
-            redis.connect().hmset(message.from_user.id, {'max_object': max_object})
+            save(message, {'max_object': max_object})
             log.info((message.from_user.id, str({'max_object': max_object})))
         bot.send_message(
             message.from_user.id,
@@ -177,6 +187,5 @@ def send_parse_result(message):
         if len(res) > 2 and len(res[-1]) > 3900: res[-1] = res[-1][:3900] + '...'
         bot.send_message(message.from_user.id, '\n'.join(map(str, res)))
     log.info((message.from_user.id, str(result)))
-
 
 bot.infinity_polling(timeout=1000, long_polling_timeout=2000)
