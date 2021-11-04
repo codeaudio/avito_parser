@@ -35,7 +35,7 @@ def send_start(message):
         message.from_user.id,
         'Это парсер Авито. Заполните данные для поиска. '
         'Обязательное поле - объект поиска. '
-        'Необязательные - город, мин. цена, макс. цена, кол-во объявлений.'
+        'Необязательные - город, мин. цена, макс. цена, кол-во объявлений.\n'
         ' Минус(-) - пропустить необязательное поле. '
     )
     msg = bot.send_message(message.from_user.id, 'Введите объект поиска')
@@ -52,6 +52,7 @@ def process_search_step(message, retry=False):
                 message.from_user.id,
                 'Примеры ввода: sankt-peterburg/санкт-петербург, '
                 'rossiya/россия, moskva/москва\n'
+                'Минус(-) - пропустить шаг\n'
                 'Если хотите вернуться назад, то напишите первый шаг'
             )
         msg = bot.reply_to(message, 'Введите город')
@@ -73,6 +74,7 @@ def process_city_step(message, retry=False):
             redis.save(message, {'city': slugify(city)})
         bot.send_message(
             message.from_user.id,
+            'Минус(-) - пропустить шаг\n'
             'Если хотите вернуться назад, то напишите второй шаг'
         )
         msg = bot.reply_to(message, 'мин. цена')
@@ -94,6 +96,7 @@ def process_min_step(message, retry=False):
             redis.save(message, {'min_price': min_price})
         bot.send_message(
             message.from_user.id,
+            'Минус(-) - пропустить шаг\n'
             'Если хотите вернуться назад, то напишите третий шаг'
         )
         msg = bot.reply_to(message, 'макс. цена')
@@ -115,10 +118,8 @@ def process_max_step(message, retry=False):
             redis.save(message, {'max_price': max_price})
         bot.send_message(
             message.from_user.id,
+            'Минус(-) - пропустить шаг\n'
             'Если хотите вернуться назад, то напишите четвертый шаг'
-        )
-        bot.send_message(
-            message.from_user.id, 'Кол-во объявлений. Минус(-) - все объявления на странице'
         )
         msg = bot.reply_to(message, 'кол-во объявлений')
         bot.register_next_step_handler(msg, process_max_object_step)
