@@ -12,5 +12,11 @@ redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)._connect()
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAdminUser])
-def redis_view(*args):
+def redis_view(request):
     return Response(json.loads(json.dumps(redis.get_all())), status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAdminUser])
+def redis_detail_view(request, user_id):
+    return Response(json.loads(json.dumps(redis.get(user_id))), status=status.HTTP_200_OK)

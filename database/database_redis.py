@@ -31,7 +31,11 @@ class Redis:
         return data
 
     def get(self, message) -> dict:
-        return dict(self.__connect.hgetall(message.from_user.id))
+        if isinstance(message, str):
+            user_id = message
+        else:
+            user_id = message.from_user.id
+        return dict(self.__connect.hgetall(user_id))
 
     def save(self, message, dictionary: dict) -> None:
         try:
