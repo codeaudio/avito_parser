@@ -6,7 +6,7 @@ from logger import log
 def info_logger(func):
     def wrapper(*args, **kwargs):
         if isinstance(args[0], WSGIRequest):
-            log.info(str(args[0].user) + ": " + str(list(str(args[0].META).split(','))[70::]))
+            log.info(str(args[0].user) + ": " + str(list(str(args[0].META).split(','))[70:]))
             return func(*args, **kwargs)
         else:
             log.info(args[0])
