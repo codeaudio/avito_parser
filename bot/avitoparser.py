@@ -13,21 +13,21 @@ class Base:
 
     HEADERS = AVITO_HEADERS
 
+    @chained
     def city(self, city):
         self.city = city
-        return self
 
+    @chained
     def min_price(self, min_price):
         self.min_price = min_price
-        return self
 
+    @chained
     def max_price(self, max_price):
         self.max_price = max_price
-        return self
 
+    @chained
     def search_object(self, search_object):
         self.search_object = search_object
-        return self
 
 
 class Avito(Base):
@@ -58,4 +58,3 @@ class Avito(Base):
         except IndexError as e:
             log(level=WARNING, msg=(e, result))
         return result
-
