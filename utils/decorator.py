@@ -9,7 +9,7 @@ def info_logger(func):
             log.info(str(list(str(args[0].META).split(','))[70::]))
             return func(*args, **kwargs)
         else:
-            log.info(str(args[0]) + '\n')
+            log.info(args[0])
         func(*args, **kwargs)
     return wrapper
 
