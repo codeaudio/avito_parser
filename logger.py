@@ -8,10 +8,3 @@ logging.basicConfig(
 )
 
 log = logging.getLogger("logger")
-
-
-def info_logger(func):
-    def wrapper(*args, **kwargs):
-        log.info(args[0])
-        func(*args, **kwargs)
-    return wrapper

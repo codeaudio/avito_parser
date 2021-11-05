@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from config.config import AVITO_HEADERS, AVITO_URL
 from config.htmlclass import A_CLASS, DIV_CLASS, SPAN_CLASS
+from utils.decorator import chained
 
 
 class Base:
@@ -30,6 +31,8 @@ class Base:
 
 
 class Avito(Base):
+
+    @chained
     def get(self):
         self.response = requests.get(
             self.BASE_URL +
@@ -39,7 +42,6 @@ class Avito(Base):
             f'{"&q=" + str(self.search_object)}',
             headers=self.HEADERS
         )
-        return self
 
     def parse(self) -> list:
         soup = BeautifulSoup(self.response.text, 'lxml')
@@ -55,3 +57,4 @@ class Avito(Base):
         except IndexError as e:
             log(level=WARNING, msg=(e, result))
         return result
+

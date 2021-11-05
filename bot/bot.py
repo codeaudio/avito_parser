@@ -6,7 +6,8 @@ from avitoparser import Avito
 from config.config import (POXY_LOGIN, PROXY_IP, PROXY_PASS, PROXY_PORT,
                            TELEGRAM_TOKEN, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
 from database.database_redis import Redis
-from logger import log, info_logger
+from logger import log
+from utils.decorator import info_logger
 
 apihelper.proxy = {
     'https': f'socks5://{POXY_LOGIN}:{PROXY_PASS}@{PROXY_IP}:{PROXY_PORT}'
