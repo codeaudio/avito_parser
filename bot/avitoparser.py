@@ -57,5 +57,4 @@ class Avito(Base):
                 result[i].append(text[i].text)
             except IndexError as e:
                 log(level=WARNING, msg=(e, result))
-                continue
         return result
