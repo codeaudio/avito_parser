@@ -1,6 +1,7 @@
 from redis import StrictRedis
 
 from logger import log
+from utils.decorator import chained
 
 
 class Redis:
@@ -10,6 +11,7 @@ class Redis:
         self.__password = password
         self.__connect = None
 
+    @chained
     def _connect(self):
         self.__connect = StrictRedis(
             host=self.__host,
@@ -18,7 +20,6 @@ class Redis:
             charset='utf-8',
             decode_responses=True
         )
-        return self
 
     def get_all(self) -> dict:
         data = {}
