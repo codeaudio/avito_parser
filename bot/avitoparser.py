@@ -53,7 +53,8 @@ class Avito(Base):
              self.BASE_URL + link[i]['href']] for i in range(0, len(link))
         ]
         try:
-            (result[i].append(text[i].text) for i in range(0, len(result)))
+            for i in range(0, len(result)):
+                result[i].append(text[i].text)
         except IndexError as e:
             log(level=WARNING, msg=(e, result))
         return result
