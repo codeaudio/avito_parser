@@ -20,7 +20,7 @@ class Redis:
         )
         return self
 
-    def get_all(self):
+    def get_all(self) -> dict:
         data = {}
         for key in self.__connect.scan_iter(match='*'):
             try:
