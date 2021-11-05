@@ -182,4 +182,4 @@ def send_parse_result(message):
     log.info((message.from_user.id, str(result)))
 
 
-bot.infinity_polling(timeout=1000, long_polling_timeout=2000)
+bot.infinity_polling(timeout=1000, long_polling_timeout=1000)

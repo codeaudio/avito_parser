@@ -20,6 +20,15 @@ class Redis:
         )
         return self
 
+    def get_all(self):
+        data = {}
+        for key in self.__connect.scan_iter(match='*'):
+            try:
+                data[key] = self.__connect.hgetall(key)
+            except Exception as e:
+                log.warning((str(e) + f" {key}"))
+        return data
+
     def get(self, message) -> dict:
         return dict(self.__connect.hgetall(message.from_user.id))
 
