@@ -22,7 +22,8 @@ class Redis:
 
     def get_all(self) -> dict:
         data = {}
-        for key in self.__connect.scan_iter(match='*'):
+        keys = self.__connect.scan_iter(match='*')
+        for key in keys:
             try:
                 data[key] = self.__connect.hgetall(key)
             except Exception as e:
