@@ -52,9 +52,10 @@ class Avito(Base):
             [price[i].text.replace(u'\xa0', ' ').replace(u'\u2009', ''),
              self.BASE_URL + link[i]['href']] for i in range(0, len(link))
         ]
-        try:
-            for i in range(0, len(result)):
+        for i in range(0, len(result)):
+            try:
                 result[i].append(text[i].text)
-        except IndexError as e:
-            log(level=WARNING, msg=(e, result))
+            except IndexError as e:
+                log(level=WARNING, msg=(e, result))
+                continue
         return result
