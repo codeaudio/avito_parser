@@ -42,7 +42,7 @@ def redis_detail_view(request, user_id):
             data = json.loads(request.body)
             redis.save(user_id, data)
             return Response(data, status=status.HTTP_200_OK)
-        except:
+        except Exception:
             return Response(status=status.HTTP_400_BAD_REQUEST)
     if request.method == 'DELETE':
         redis.delete(user_id)
