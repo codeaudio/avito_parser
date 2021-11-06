@@ -17,12 +17,15 @@ def redis_view(request):
     if request.method == 'GET':
         return Response(json.loads(json.dumps(redis.get_all())), status=status.HTTP_200_OK)
     if request.method == 'POST':
+        key = list(json.loads(request.body))
+        if len(key) > 1:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         try:
             key = list(json.loads(request.body))[0]
             if not key in redis.get_keys():
                 redis.save(key, dict(json.loads(request.body)).get(key))
                 return Response(status=status.HTTP_201_CREATED)
-            return Response(status=status.HTTP_304_NOT_MODIFIED)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         except Exception:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
