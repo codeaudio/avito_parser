@@ -16,7 +16,7 @@ def info_logger(func):
             return func(*args, **kwargs)
         else:
             log.info(args[0])
-        func(*args, **kwargs)
+            func(*args, **kwargs)
     return wrapper
 
 
