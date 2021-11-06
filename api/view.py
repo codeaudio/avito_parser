@@ -35,6 +35,8 @@ def redis_view(request):
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 @permission_classes([permissions.IsAdminUser])
 def redis_detail_view(request, user_id):
+    if request.method == 'GET':
+        return Response(json.loads(json.dumps(redis.get(user_id))), status=status.HTTP_200_OK)
     if request.method in ('PUT', 'PATCH'):
         try:
             data = json.loads(request.body)
@@ -42,8 +44,6 @@ def redis_detail_view(request, user_id):
             return Response(data, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-    if request.method == 'GET':
-        return Response(json.loads(json.dumps(redis.get(user_id))), status=status.HTTP_200_OK)
     if request.method == 'DELETE':
         redis.delete(user_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
