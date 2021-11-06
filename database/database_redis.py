@@ -21,8 +21,11 @@ class Redis:
             decode_responses=True
         )
 
+    def get_keys(self):
+        return self.__connect.scan_iter(match='*')
+
     def get_all(self) -> dict:
-        data, keys = {}, self.__connect.scan_iter(match='*')
+        data, keys = {}, self.get_keys()
         for key in keys:
             try:
                 data[key] = self.__connect.hgetall(key)
@@ -38,10 +41,17 @@ class Redis:
         return dict(self.__connect.hgetall(user_id))
 
     def save(self, message, dictionary: dict) -> None:
+        if isinstance(message, str):
+            user_id = message
+        else:
+            user_id = message.from_user.id
         try:
-            self.__connect.hmset(message.from_user.id, dictionary)
+            self.__connect.hmset(user_id, dictionary)
         except Exception as e:
             save = self.get(message)
-            self.__connect.delete(message.from_user.id)
-            self.__connect.hmset(message.from_user.id, dictionary.update(save))
+            self.__connect.delete(user_id)
+            self.__connect.hmset(user_id, dictionary.update(save))
             log.warning(e)
+
+    def delete(self, user_id):
+        self.__connect.delete(user_id)
