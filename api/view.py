@@ -1,11 +1,10 @@
-from rest_framework.utils import json
-
-from database.database_redis import Redis
 from rest_framework import status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.utils import json
 
 from config.config import REDIS_HOST, REDIS_PORT, REDIS_PASSWORD
+from database.database_redis import Redis
 from utils.decorator import info_logger
 
 redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)._connect()
