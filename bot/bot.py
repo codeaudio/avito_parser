@@ -25,8 +25,15 @@ def help_message(message):
         message.from_user.id,
         '/start - запуск ввода данных для поиска \n'
         '/parse - запуск парсинга после ввода/последний запрос юзера \n'
-        'вернуться назад можно, если написать название предведущего шага. Всего 5 шагов. Пример: второй шаг '
+        '/stop - остановить ввыод данных \n'
+        'Вернуться назад можно, если написать название предведущего шага. Всего 5 шагов. Пример: второй шаг'
     )
+
+
+@info_logger
+def stop(message):
+    bot.send_message(message.from_user.id, 'Выход')
+    bot.clear_step_handler(message)
 
 
 @bot.message_handler(commands=['start'])
@@ -40,15 +47,26 @@ def send_start(message):
         ' Минус(-) - пропустить необязательное поле. '
     )
     msg = bot.send_message(message.from_user.id, 'Введите объект поиска')
+
     bot.register_next_step_handler(msg, process_search_step)
 
 
 @info_logger
 def process_search_step(message, retry=False):
+    if str(message.text).strip() == '/stop':
+        return stop(message)
     try:
         if not retry:
             search_object = str(message.text).strip()
             redis.save(message, {'search_object': search_object})
+            if 'info' not in redis.get(message):
+                redis.save(
+                    message, {
+                        'username': message.from_user.username,
+                        'first_name': message.from_user.first_name,
+                        'last_name': message.from_user.last_name
+                    }
+                )
             bot.send_message(
                 message.from_user.id,
                 'Примеры ввода: sankt-peterburg/санкт-петербург, '
@@ -65,6 +83,8 @@ def process_search_step(message, retry=False):
 
 @info_logger
 def process_city_step(message, retry=False):
+    if str(message.text).strip() == '/stop':
+        return stop(message)
     if str(message.text).lower().strip() in ['первый шаг']:
         return send_start(message)
     try:
@@ -87,6 +107,8 @@ def process_city_step(message, retry=False):
 
 @info_logger
 def process_min_step(message, retry=False):
+    if str(message.text).strip() == '/stop':
+        return stop(message)
     if str(message.text).lower().strip() in ['второй шаг']:
         return process_search_step(message, True)
     try:
@@ -109,6 +131,8 @@ def process_min_step(message, retry=False):
 
 @info_logger
 def process_max_step(message, retry=False):
+    if str(message.text).strip() == '/stop':
+        return stop(message)
     if str(message.text).lower().strip() in ['третий шаг']:
         return process_city_step(message, True)
     try:
@@ -131,6 +155,8 @@ def process_max_step(message, retry=False):
 
 @info_logger
 def process_max_object_step(message, retry=False):
+    if str(message.text).strip() == '/stop':
+        return stop(message)
     if str(message.text).lower().strip() in ['четвертый шаг']:
         return process_min_step(message, True)
     try:
@@ -155,6 +181,8 @@ def process_max_object_step(message, retry=False):
 @bot.message_handler(commands=['parse'])
 @info_logger
 def send_parse_result(message):
+    if str(message.text).strip() == '/stop':
+        return stop(message)
     if str(message.text).lower().strip() in ['пятый шаг']:
         return process_max_step(message, True)
     try:
