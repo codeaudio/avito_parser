@@ -85,7 +85,7 @@ def process_search_step(message, retry=False):
 def process_city_step(message, retry=False):
     if str(message.text).strip() == '/stop':
         return stop(message)
-    if str(message.text).lower().strip() in ['первый шаг']:
+    if str(message.text).lower().strip() == 'первый шаг':
         return send_start(message)
     try:
         if not retry:
@@ -109,7 +109,7 @@ def process_city_step(message, retry=False):
 def process_min_step(message, retry=False):
     if str(message.text).strip() == '/stop':
         return stop(message)
-    if str(message.text).lower().strip() in ['второй шаг']:
+    if str(message.text).lower().strip() == 'второй шаг':
         return process_search_step(message, True)
     try:
         if not retry:
@@ -133,7 +133,7 @@ def process_min_step(message, retry=False):
 def process_max_step(message, retry=False):
     if str(message.text).strip() == '/stop':
         return stop(message)
-    if str(message.text).lower().strip() in ['третий шаг']:
+    if str(message.text).lower().strip() == 'третий шаг':
         return process_city_step(message, True)
     try:
         if not retry:
@@ -157,7 +157,7 @@ def process_max_step(message, retry=False):
 def process_max_object_step(message, retry=False):
     if str(message.text).strip() == '/stop':
         return stop(message)
-    if str(message.text).lower().strip() in ['четвертый шаг']:
+    if str(message.text).lower().strip() == 'четвертый шаг':
         return process_min_step(message, True)
     try:
         if not retry:
@@ -183,7 +183,7 @@ def process_max_object_step(message, retry=False):
 def send_parse_result(message):
     if str(message.text).strip() == '/stop':
         return stop(message)
-    if str(message.text).lower().strip() in ['пятый шаг']:
+    if str(message.text).lower().strip() == 'пятый шаг':
         return process_max_step(message, True)
     try:
         output_dict = redis.get(message)
