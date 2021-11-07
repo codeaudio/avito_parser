@@ -57,8 +57,6 @@ def process_search_step(message, retry=False):
         return stop(message)
     try:
         if not retry:
-            search_object = str(message.text).strip()
-            redis.save(message, {'search_object': search_object})
             if 'info' not in redis.get(message):
                 redis.save(
                     message, {
@@ -67,6 +65,8 @@ def process_search_step(message, retry=False):
                         'last_name': message.from_user.last_name
                     }
                 )
+            search_object = str(message.text).strip()
+            redis.save(message, {'search_object': search_object})
             bot.send_message(
                 message.from_user.id,
                 'Примеры ввода: sankt-peterburg/санкт-петербург, '
