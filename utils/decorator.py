@@ -8,11 +8,14 @@ from logger import log
 def info_logger(func):
     def wrapper(*args, **kwargs):
         if isinstance(args[0], WSGIRequest):
-            log.info(
-                str(args[0].user) + ": " +
-                str(json.loads(args[0].body or json.dumps({}))) +
-                str(list(str(args[0].META).split(','))[70:])
-            )
+            try:
+                log.info(
+                    str(args[0].user) + ": " +
+                    str(json.loads(args[0].body or json.dumps({}))) +
+                    str(list(str(args[0].META).split(','))[70:])
+                )
+            except Exception as e:
+                log.error(e)
             return func(*args, **kwargs)
         else:
             log.info(args[0])
