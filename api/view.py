@@ -23,7 +23,7 @@ def redis_view(request):
             if len(key) > 1:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             key = key[0]
-            if not key in redis.get_keys():
+            if key not in redis.get_keys():
                 redis.save(key, dict(json_obj).get(key))
                 return Response(status=status.HTTP_201_CREATED)
             return Response(status=status.HTTP_400_BAD_REQUEST)
