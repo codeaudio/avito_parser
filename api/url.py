@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .view import redis_view, redis_detail_view
+from .view import redis_detail_view, redis_view
 
 app_name = 'api'
 

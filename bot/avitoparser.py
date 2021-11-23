@@ -1,4 +1,4 @@
-from logging import log, WARNING
+from logging import WARNING, log
 
 import requests
 from bs4 import BeautifulSoup

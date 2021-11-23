@@ -1,9 +1,9 @@
-from rest_framework import status, permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.utils import json
 
-from config.config import REDIS_HOST, REDIS_PORT, REDIS_PASSWORD
+from config.config import REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 from database.database_redis import Redis
 from utils.decorator import info_logger
 
