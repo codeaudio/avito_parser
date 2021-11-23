@@ -1,8 +1,26 @@
 import json
 
 from django.core.handlers.wsgi import WSGIRequest
+from telebot.types import Message
 
 from logger import log
+
+
+class Adapter:
+
+    @staticmethod
+    def massage_to_user_id(func):
+        def wrapper(self, *args):
+            if isinstance(args[0], Message):
+                user_id = args[0].from_user.id
+                if len(args) > 1:
+                    new_args = tuple([user_id] + [element for element in args[1:]])
+                else:
+                    new_args = (user_id,)
+            else:
+                new_args = args
+            return func(self, *new_args)
+        return wrapper
 
 
 def info_logger(func):
