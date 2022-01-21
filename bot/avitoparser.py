@@ -2,7 +2,6 @@ from logging import WARNING, log
 
 import requests
 from bs4 import BeautifulSoup
-
 from config.config import AVITO_HEADERS, AVITO_URL
 from config.htmlclass import A_CLASS, DIV_CLASS, SPAN_CLASS
 from utils.decorator import chained
