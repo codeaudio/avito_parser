@@ -62,9 +62,9 @@ def process_search_step(message, retry=False):
             if 'info' not in redis.get(message):
                 redis.save(
                     message, {
-                        'username': message.from_user.username,
-                        'first_name': message.from_user.first_name,
-                        'last_name': message.from_user.last_name
+                        'username': str(message.from_user.username),
+                        'first_name': str(message.from_user.first_name),
+                        'last_name': str(message.from_user.last_name)
                     }
                 )
             search_object = str(message.text).strip()
