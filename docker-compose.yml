@@ -1,8 +1,16 @@
 version: '3.3'
 
 services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfiles/bot/Dockerfile
+    restart: always
+
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfiles/api/Dockerfile
     restart: always
     volumes:
       - static_value:/code/static/
@@ -12,7 +20,7 @@ services:
   nginx:
     image: nginx:1.19.3
     ports:
-      - "8009:8009"
+      - "8008:8008"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - static_value:/var/html/static/

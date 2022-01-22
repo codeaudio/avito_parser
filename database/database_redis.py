@@ -1,7 +1,7 @@
 from redis import StrictRedis
 
 from logger import log
-from utils.decorator import Adapter, chained
+from utils.decorator import chained, Adapter
 
 
 class Redis:
