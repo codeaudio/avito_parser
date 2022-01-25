@@ -1,8 +1,9 @@
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.utils import json
 
+from api.serializers import redisDetailSerializer, redisSerializer, redisPostSerializer, redisDeleteSerializer, \
+    redisPutPatchSerializer
 from config.config import REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 from database.database_redis import Redis
 from utils.decorator import info_logger
@@ -15,20 +16,14 @@ redis = Redis(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)._connect()
 @permission_classes([permissions.IsAdminUser])
 def redis_view(request):
     if request.method == 'GET':
-        return Response(json.loads(json.dumps(redis.get_all())), status=status.HTTP_200_OK)
+        serialize = redisSerializer(data=redis.get_all())
+        serialize.is_valid(raise_exception=True)
+        return Response(serialize.validated_data, status=status.HTTP_200_OK)
     if request.method == 'POST':
-        try:
-            json_obj = json.loads(request.body)
-            key = list(json_obj)
-            if len(key) > 1:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            key = key[0]
-            if key not in redis.get_keys():
-                redis.save(key, dict(json_obj).get(key))
-                return Response(status=status.HTTP_201_CREATED)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serialize = redisPostSerializer(data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.validated_data, status=status.HTTP_201_CREATED)
 
 
 @info_logger
@@ -36,14 +31,17 @@ def redis_view(request):
 @permission_classes([permissions.IsAdminUser])
 def redis_detail_view(request, user_id):
     if request.method == 'GET':
-        return Response(json.loads(json.dumps(redis.get(user_id))), status=status.HTTP_200_OK)
+        serialize = redisDetailSerializer(
+            data=redis.get(user_id), context={'user_id': user_id}
+        )
+        serialize.is_valid(raise_exception=True)
+        return Response(serialize.validated_data, status=status.HTTP_200_OK)
     if request.method in ('PUT', 'PATCH'):
-        try:
-            data = json.loads(request.body)
-            redis.save(user_id, data)
-            return Response(data, status=status.HTTP_200_OK)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        serialize = redisPutPatchSerializer(data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.update(user_id)
+        return Response(serialize.validated_data, status=status.HTTP_200_OK)
     if request.method == 'DELETE':
-        redis.delete(user_id)
+        redisDeleteSerializer(user_id).delete(user_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
