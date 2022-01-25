@@ -43,5 +43,5 @@ def redis_detail_view(request, user_id):
         serialize.update(user_id)
         return Response(serialize.validated_data, status=status.HTTP_200_OK)
     if request.method == 'DELETE':
-        redisDeleteSerializer(user_id).delete(user_id)
+        redisDeleteSerializer().delete(user_id)
         return Response(status=status.HTTP_204_NO_CONTENT)

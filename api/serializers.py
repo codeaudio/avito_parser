@@ -81,7 +81,6 @@ class redisPutPatchSerializer(Serializer):
             'username', 'last_name', 'first_name',
             'search_object', 'city', 'min_price', 'max_price', 'max_object'
         ]
-
         diff = set(fields).symmetric_difference(self.initial_data.keys())
         if diff:
             raise serializers.ValidationError(
@@ -109,8 +108,7 @@ class redisPutPatchSerializer(Serializer):
 class redisDeleteSerializer(Serializer):
 
     def validate(self, *args, **kwargs):
-        json_obj = self.initial_data
-        key = list(json_obj)
+        key = list(self.initial_data)
         if key not in redis.get_keys():
             raise serializers.ValidationError(
                 detail='key has been deleted'
