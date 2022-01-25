@@ -2,8 +2,9 @@ from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from api.serializers import redisDetailSerializer, redisSerializer, redisPostSerializer, redisDeleteSerializer, \
-    redisPutPatchSerializer
+from api.serializers import (redisDetailSerializer, redisSerializer,
+                             redisPostSerializer, redisDeleteSerializer,
+                             redisPutPatchSerializer)
 from config.config import REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 from database.database_redis import Redis
 from utils.decorator import info_logger
@@ -37,7 +38,6 @@ def redis_detail_view(request, user_id):
         serialize.is_valid(raise_exception=True)
         return Response(serialize.validated_data, status=status.HTTP_200_OK)
     if request.method in ('PUT', 'PATCH'):
-
         serialize = redisPutPatchSerializer(data=request.data)
         serialize.is_valid(raise_exception=True)
         serialize.update(user_id)
